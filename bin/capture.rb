@@ -5,11 +5,16 @@ require 'RMagick'
 require 'selenium-webdriver'
 require 'uri'
 
-def setup_driver
+def setup_driver(is_pc_mode)
   options = Selenium::WebDriver::Options.chrome
   options.add_argument('--headless')
   options.add_argument('--disable-gpu')
-  options.add_argument('--window-size=1280,800')
+
+  if is_pc_mode
+    options.add_argument('--window-size=1280,800')
+  else
+    options.add_argument('--window-size=375,667')
+  end
 
   puts "Setting up the driver..."
   Selenium::WebDriver.for(:chrome, options: options)
@@ -69,7 +74,7 @@ def add_pathstamp(image_path, url)
   image.write(image_path)
 end
 
-def save_full_screenshot(driver, url)
+def save_full_screenshot(driver, is_pc_mode, url)
   puts "  Capturing full screenshot for: #{url}"
   timestamp = Time.now.strftime('%Y-%m-%d %H.%M.%S')
   filename = "スクリーンショット #{timestamp}.png"
@@ -86,17 +91,35 @@ def save_full_screenshot(driver, url)
   add_pathstamp(image_path, url)
   puts "  Screenshot saved: #{image_path}"
   puts ''
+  
+  if is_pc_mode
+    driver.manage.window.resize_to(1280, 800)
+  else
+    driver.manage.window.resize_to(375, 667)
+  end
 end
 
 def capture_screenshot
-  driver = setup_driver
+  puts "Enter 'pc' for PC or 'sp' for smartphone captures. [pc/sp]"
+  is_pc_mode = gets.chomp.downcase == 'pc'
+
+  if is_pc_mode
+    puts 'Capturing in PC size...'
+    puts ''
+  else
+    puts 'Capturing in SP size...'
+    puts ''
+  end
+
+  
+  driver = setup_driver(is_pc_mode)
   urls = target_urls
 
   urls.each_with_index do |url, index|
     puts "  Processing #{index + 1}/#{urls.length}: #{url}"
     begin
       load_cookies(url, driver)
-      save_full_screenshot(driver, url)
+      save_full_screenshot(driver, is_pc_mode, url)
     rescue => e
       puts "  [Error] can't capture on #{url}  error: #{e}"
       next
