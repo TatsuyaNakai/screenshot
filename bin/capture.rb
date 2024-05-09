@@ -27,7 +27,8 @@ def get_domain(url)
   uri = URI.parse(url)
   scheme = uri.scheme
   host = uri.host
-  "#{scheme}://#{host}/"
+  port = uri.port
+  "#{scheme}://#{host}:#{port}/"
 end
 
 def load_cookies(url, driver)
