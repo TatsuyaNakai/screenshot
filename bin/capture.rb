@@ -100,6 +100,9 @@ def save_full_screenshot(driver, is_pc_mode, url)
 end
 
 def capture_screenshot
+  puts 'Use cookies for session management?[y/n]'
+  is_used_cookie = gets.chomp.downcase == 'y'
+
   puts "Enter 'pc' for PC or 'sp' for smartphone captures. [pc/sp]"
   is_pc_mode = gets.chomp.downcase == 'pc'
 
@@ -118,7 +121,7 @@ def capture_screenshot
   urls.each_with_index do |url, index|
     puts "  Processing #{index + 1}/#{urls.length}: #{url}"
     begin
-      load_cookies(url, driver)
+      load_cookies(url, driver) if is_used_cookie
       save_full_screenshot(driver, is_pc_mode, url)
     rescue => e
       puts "  [Error] can't capture on #{url}  error: #{e}"
